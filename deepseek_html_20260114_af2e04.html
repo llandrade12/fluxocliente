@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fluxo de Clientes Planilha</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+  
+  :root {
+    --bg: #0f0f1a;
+    --bg-gradient: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 50%, #16213e 100%);
+    --panel: rgba(30, 30, 50, 0.8);
+    --card: rgba(40, 40, 70, 0.6);
+    --text: #f0f0f5;
+    --muted: #9090a0;
+    --primary: #6366f1;
+    --primary-glow: rgba(99, 102, 241, 0.3);
+    --success: #10b981;
+    --success-glow: rgba(16, 185, 129, 0.3);
+    --danger: #f43f5e;
+    --danger-glow: rgba(244, 63, 94, 0.3);
+    --warning: #f59e0b;
+    --warning-glow: rgba(245, 158, 11, 0.3);
+    --border: rgba(255, 255, 255, 0.1);
+    --white: #ffffff;
+    --glass: rgba(255, 255, 255, 0.05);
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg-gradient);
+    background-attachment: fixed;
+    color: var(--text);
+    margin: 0;
+    padding: 20px;
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+
+  .wrap { max-width: 1400px; margin: 0 auto; }
+
+  header.app-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding: 20px 25px;
+    background: var(--panel);
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    backdrop-filter: blur(20px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  }
+
+  .logo {
+    background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%);
+    color: white;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1.2rem;
+    border-radius: 14px;
+    margin-right: 18px;
+    box-shadow: 0 4px 15px var(--primary-glow);
+  }
+
+  .title { display: flex; align-items: center; }
+  h1 { 
+    margin: 0; 
+    font-size: 1.75rem; 
+    font-weight: 700;
+    background: linear-gradient(135deg, #fff 0%, #a5b4fc 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .subtitle { 
+    font-size: 0.9rem; 
+    color: var(--muted); 
+    font-weight: 400;
+    margin-top: 4px;
+  }
+
+  .panel {
+    background: var(--panel);
+    border-radius: 20px;
+    padding: 28px;
+    margin-bottom: 25px;
+    border: 1px solid var(--border);
+    backdrop-filter: blur(20px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  }
+
+  h2 { 
+    margin-top: 0; 
+    font-size: 1.3rem; 
+    font-weight: 600;
+    display: flex; 
+    align-items: center; 
+    gap: 12px;
+    color: var(--text);
+  }
+  h2 i { color: var(--primary); }
+  h3 { 
+    margin-bottom: 15px; 
+    font-size: 1.15rem; 
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .input {
+    background: var(--glass);
+    border: 1px solid var(--border);
+    color: white;
+    padding: 12px 16px;
+    border-radius: 10px;
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 12px;
+    font-family: inherit;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+  }
+  .input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-glow);
+  }
+  .input::file-selector-button {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    margin-right: 12px;
+    transition: all 0.2s;
+  }
+  .input::file-selector-button:hover {
+    background: #5558e3;
+  }
+
+  .btn {
+    cursor: pointer;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-family: inherit;
+  }
+
+  .btn:hover { 
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  }
+  .btn:active {
+    transform: translateY(0);
+  }
+  .btn-add { 
+    background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%);
+    color: white; 
+    box-shadow: 0 4px 15px var(--primary-glow);
+  }
+
+  .card {
+    background: var(--card);
+    border-radius: 16px;
+    padding: 20px;
+    border: 1px solid var(--border);
+    overflow-x: auto;
+    backdrop-filter: blur(10px);
+    -webkit-overflow-scrolling: touch;
+  }
+
+  table { 
+    width: 100%; 
+    border-collapse: collapse; 
+    margin-top: 15px; 
+    font-size: 0.85rem; 
+    min-width: 600px;
+    table-layout: fixed;
+  }
+  th, td { 
+    border-bottom: 1px solid var(--border); 
+    padding: 8px 6px; 
+    text-align: left; 
+    vertical-align: middle;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  th { 
+    background: var(--glass); 
+    color: var(--muted); 
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+  }
+  th:first-child { border-radius: 10px 0 0 0; }
+  th:last-child { border-radius: 0 10px 0 0; }
+  tr:hover td {
+    background: var(--glass);
+  }
+  tr:last-child td:first-child { border-radius: 0 0 0 10px; }
+  tr:last-child td:last-child { border-radius: 0 0 10px 0; }
+
+  /* Larguras específicas para colunas */
+  th:nth-child(1), td:nth-child(1) { width: 22%; } /* Nome */
+  th:nth-child(2), td:nth-child(2) { width: 12%; } /* Período */
+  th:nth-child(3), td:nth-child(3) { width: 8%; }  /* Dias */
+  th:nth-child(4), td:nth-child(4) { width: 8%; }  /* Saldo */
+  th:nth-child(5), td:nth-child(5) { width: 14%; } /* Financeiro */
+  th:nth-child(6), td:nth-child(6) { width: 28%; } /* Obs */
+  th:nth-child(7), td:nth-child(7) { width: 8%; min-width: 50px; max-width: 60px; } /* Zap */
+
+  .highlight-23 {
+    border: 2px solid var(--warning);
+    background: var(--warning-glow);
+    border-radius: 12px;
+  }
+
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+    margin-bottom: 25px;
+  }
+
+  .summary-item {
+    padding: 25px 20px;
+    border-radius: 16px;
+    text-align: center;
+    background: var(--card);
+    border: 1px solid var(--border);
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .summary-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    border-radius: 16px 16px 0 0;
+  }
+  .summary-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  }
+
+  .btn-zap {
+    background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+    color: white;
+    border: none;
+    padding: 6px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    box-shadow: 0 3px 8px rgba(37, 211, 102, 0.3);
+    font-size: 0.75rem;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin: 0 auto;
+  }
+  .btn-zap:hover { 
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4);
+  }
+  .btn-zap i {
+    font-size: 0.9rem;
+  }
+
+  /* Modal WhatsApp */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(15, 15, 26, 0.9);
+    z-index: 2000;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(10px);
+  }
+  .modal-content {
+    background: linear-gradient(145deg, rgba(40, 40, 70, 0.95) 0%, rgba(30, 30, 50, 0.95) 100%);
+    padding: 30px;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 520px;
+    max-height: 80vh;
+    overflow-y: auto;
+    border: 1px solid var(--border);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5), 0 0 100px rgba(99, 102, 241, 0.1);
+  }
+  .modal-content::-webkit-scrollbar {
+    width: 8px;
+  }
+  .modal-content::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 4px;
+  }
+  .modal-content::-webkit-scrollbar-thumb {
+    background: var(--primary);
+    border-radius: 4px;
+  }
+  .modal-content::-webkit-scrollbar-thumb:hover {
+    background: #8b5cf6;
+  }
+  .msg-option {
+    background: var(--glass);
+    border: 1px solid var(--border);
+    padding: 16px;
+    margin-bottom: 12px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: var(--white);
+    text-align: left;
+    width: 100%;
+    font-family: inherit;
+  }
+  .msg-option:hover { 
+    background: var(--primary-glow); 
+    border-color: var(--primary); 
+    transform: translateX(8px);
+    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.2);
+  }
+  .msg-option strong { 
+    color: var(--primary); 
+    display: block; 
+    margin-bottom: 6px;
+    font-weight: 600;
+  }
+  .msg-option small { color: var(--muted); font-size: 0.9rem; }
+
+  .status-badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .status-atrasado { 
+    background: var(--danger-glow); 
+    color: var(--danger); 
+    box-shadow: 0 2px 8px var(--danger-glow);
+  }
+  .status-ok { 
+    background: var(--primary-glow); 
+    color: var(--primary); 
+    box-shadow: 0 2px 8px var(--primary-glow);
+  }
+  .status-super { 
+    background: var(--success-glow); 
+    color: var(--success); 
+    box-shadow: 0 2px 8px var(--success-glow);
+  }
+
+  /* Responsividade para telas menores */
+  @media (max-width: 768px) {
+    body {
+      padding: 10px;
+    }
+    
+    .panel {
+      padding: 20px;
+    }
+    
+    table {
+      font-size: 0.8rem;
+      min-width: 100%;
+    }
+    
+    th, td {
+      padding: 6px 4px;
+    }
+    
+    th:nth-child(1), td:nth-child(1) { width: 20%; }
+    th:nth-child(2), td:nth-child(2) { width: 11%; }
+    th:nth-child(3), td:nth-child(3) { width: 7%; }
+    th:nth-child(4), td:nth-child(4) { width: 7%; }
+    th:nth-child(5), td:nth-child(5) { width: 15%; }
+    th:nth-child(6), td:nth-child(6) { width: 25%; }
+    th:nth-child(7), td:nth-child(7) { width: 6%; min-width: 40px; }
+    
+    .btn-zap {
+      width: 32px;
+      height: 32px;
+      padding: 4px 6px;
+    }
+    
+    .btn-zap i {
+      font-size: 0.8rem;
+    }
+    
+    h1 {
+      font-size: 1.5rem;
+    }
+    
+    .summary-grid {
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 15px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    header.app-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 15px;
+    }
+    
+    .title {
+      width: 100%;
+    }
+    
+    th:nth-child(5) span, td:nth-child(5) span {
+      font-size: 0.75rem;
+    }
+    
+    td:nth-child(5) div {
+      font-size: 0.6rem;
+    }
+    
+    .btn {
+      padding: 10px 16px;
+      font-size: 0.85rem;
+    }
+  }
+
+  /* Animações */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  .panel, .summary-item, .card {
+    animation: fadeIn 0.5s ease-out;
+  }
+
+  /* Placeholder vazio */
+  #mensagemVazia {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--muted);
+  }
+  #mensagemVazia i {
+    font-size: 4rem;
+    margin-bottom: 20px;
+    opacity: 0.3;
+  }
+</style>
+</head>
+
+<body>
+<div class="wrap">
+
+<header class="app-header">
+  <div class="title">
+    <div class="logo">ES</div>
+    <div>
+      <h1>Fluxo de Clientes Planilha</h1>
+      <div class="subtitle">Analisador de Clientes (Baseado em Planilha Real)</div>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<section class="panel">
+  <h2><i class="fa-solid fa-file-excel"></i> Analisador de Excel</h2>
+  
+  <div style="margin-bottom:15px; display:flex; gap:10px; flex-wrap:wrap;">
+    <div style="flex:2; min-width:200px;">
+      <label style="font-size:0.85rem; color:var(--muted);">Arquivo Excel:</label>
+      <input type="file" id="inputExcel" accept=".xlsx, .xls, .csv" class="input">
+    </div>
+    <div style="flex:1; min-width:130px;">
+      <label style="font-size:0.85rem; color:var(--muted);">Data da Pesquisa:</label>
+      <input type="date" id="dataPesquisa" class="input">
+    </div>
+    <div style="flex:1; min-width:100px;">
+      <label style="font-size:0.85rem; color:var(--muted);">Linha Inicial:</label>
+      <input type="number" id="linhaInicial" class="input" placeholder="Ex: 2">
+    </div>
+    <div style="flex:1; min-width:100px;">
+      <label style="font-size:0.85rem; color:var(--muted);">Linha Final:</label>
+      <input type="number" id="linhaFinal" class="input" placeholder="Ex: 20">
+    </div>
+  </div>
+
+  <button class="btn btn-add" onclick="analisarExcel()">
+    <i class="fa-solid fa-magnifying-glass"></i> Analisar Planilha
+  </button>
+
+  <div id="resultadoArea" style="margin-top:25px; display:none;">
+    
+    <div class="summary-grid">
+      <div class="summary-item" style="border-top: 4px solid var(--danger);">
+        <div style="color: var(--danger); font-weight: bold;">ATRASADOS</div>
+        <div id="countAtrasados" style="font-size: 1.5rem; margin-top: 5px;">0</div>
+      </div>
+      <div class="summary-item" style="border-top: 4px solid var(--primary);">
+        <div style="color: var(--primary); font-weight: bold;">EM DIA (OK)</div>
+        <div id="countOK" style="font-size: 1.5rem; margin-top: 5px;">0</div>
+      </div>
+      <div class="summary-item" style="border-top: 4px solid var(--success);">
+        <div style="color: var(--success); font-weight: bold;">SUPER CLIENTES</div>
+        <div id="countSuper" style="font-size: 1.5rem; margin-top: 5px;">0</div>
+      </div>
+    </div>
+
+    <!-- GRÁFICO -->
+    <div class="card" style="margin-bottom: 25px;">
+      <h3 style="margin-top:0;"><i class="fa-solid fa-chart-pie"></i> Distribuição de Clientes</h3>
+      <div style="position: relative; height: 300px; width: 100%;">
+        <canvas id="fluxoChart"></canvas>
+      </div>
+    </div>
+
+    <!-- TABELA 23 DIAS -->
+    <div id="area23Dias" style="margin-bottom:30px; display:none;">
+      <h3 style="color: var(--warning);"><i class="fa-solid fa-calendar-day"></i> Clientes com 23 Dias de Empréstimo</h3>
+      <div class="card highlight-23" id="tabela23Dias"></div>
+    </div>
+
+    <!-- TABELA ATRASADOS -->
+    <div id="areaAtrasados" style="margin-bottom:25px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:10px;">
+        <h3 style="color: var(--danger); margin:0;"><i class="fa-solid fa-circle-xmark"></i> Lista: Atrasados</h3>
+        <div style="display:flex; gap:10px;">
+          <button class="btn" style="background: #6366f1; font-size:0.8rem;" onclick="copiarAtrasados()">
+            <i class="fa-solid fa-copy"></i> Copiar Lista
+          </button>
+          <button class="btn" style="background: var(--danger); font-size:0.8rem;" onclick="exportarAtrasadosPDF()">
+            <i class="fa-solid fa-file-pdf"></i> Exportar PDF (A4)
+          </button>
+        </div>
+      </div>
+      <div class="card" id="tabelaAtrasados"></div>
+    </div>
+
+    <!-- TABELA OK -->
+    <div style="margin-bottom:25px;">
+      <h3 style="color: var(--primary);"><i class="fa-solid fa-circle-check"></i> Lista: Em Dia (OK)</h3>
+      <div class="card" id="tabelaOK"></div>
+    </div>
+
+    <!-- TABELA SUPER -->
+    <div style="margin-bottom:25px;">
+      <h3 style="color: var(--success);"><i class="fa-solid fa-star"></i> Lista: Super Clientes</h3>
+      <div class="card" id="tabelaSuper"></div>
+    </div>
+
+  </div>
+
+  <div id="mensagemVazia" style="text-align:center; padding:40px; color:var(--muted);">
+    <i class="fa-solid fa-file-circle-question" style="font-size:2rem; display:block; margin-bottom:10px;"></i>
+    Carregue a planilha para visualizar a análise.
+  </div>
+</section>
+
+<!-- Modal WhatsApp -->
+<div id="modalZap" class="modal-overlay">
+  <div class="modal-content">
+    <h3 style="margin-top:0; margin-bottom:15px; display:flex; align-items:center; gap:10px;">
+      <i class="fa-brands fa-whatsapp" style="color:#25D366;"></i> Escolha a Mensagem
+    </h3>
+    <div id="msgList"></div>
+    <button class="btn" onclick="fecharModalZap()" style="margin-top:15px; width:100%; justify-content:center; background:transparent; border:1px solid var(--border);">
+      Cancelar
+    </button>
+  </div>
+</div>
+
+</main>
+</div>
+
+<script>
+window.addEventListener('DOMContentLoaded', () => {
+  const hoje = new Date().toISOString().split('T')[0];
+  document.getElementById('dataPesquisa').value = hoje;
+});
+
+let chartInstance = null;
+
+function analisarExcel() {
+  const fileInput = document.getElementById('inputExcel');
+  if (!fileInput.files.length) {
+    alert("Por favor, selecione um arquivo Excel.");
+    return;
+  }
+
+  const file = fileInput.files[0];
+  const reader = new FileReader();
+
+  reader.onload = function(e) {
+    try {
+      const data = new Uint8Array(e.target.result);
+      const workbook = XLSX.read(data, { type: 'array', cellDates: true });
+      processarDados(workbook);
+    } catch (err) {
+      console.error(err);
+      alert("Erro ao processar o arquivo.");
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function processarDados(workbook) {
+  // Usar a primeira aba (Planilha Atual)
+  const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+  let data = XLSX.utils.sheet_to_json(worksheet);
+  
+  // Filtro por Intervalo de Linhas (Baseado no índice do array + 2 para alinhar com o Excel)
+  const lIni = parseInt(document.getElementById('linhaInicial').value);
+  const lFim = parseInt(document.getElementById('linhaFinal').value);
+  
+  if (!isNaN(lIni) || !isNaN(lFim)) {
+    data = data.filter((_, index) => {
+      const numLinhaExcel = index + 2; // +2 porque a primeira linha de dados no JSON é a 2 no Excel
+      const acimaIni = isNaN(lIni) || numLinhaExcel >= lIni;
+      const abaixoFim = isNaN(lFim) || numLinhaExcel <= lFim;
+      return acimaIni && abaixoFim;
+    });
+  }
+
+  const inputData = document.getElementById('dataPesquisa');
+  let dataReferencia = new Date();
+  if (inputData && inputData.value) {
+    const p = inputData.value.split('-');
+    dataReferencia = new Date(p[0], p[1]-1, p[2]);
+  }
+  dataReferencia.setHours(0, 0, 0, 0);
+
+  let atrasados = [];
+  let ok = [];
+  let superClientes = [];
+  let clientes23Dias = [];
+
+  data.forEach(row => {
+    // Helper para buscar colunas ignorando maiúsculas/minúsculas e variações
+    const getVal = (keys) => {
+      const foundKey = Object.keys(row).find(k => {
+        const kUpper = k.toUpperCase().trim();
+        return keys.some(key => kUpper.includes(key.toUpperCase()));
+      });
+      return foundKey ? row[foundKey] : null;
+    };
+
+    // Mapeamento para a nova estrutura da planilha
+    const nome = getVal(['CLIENTE', 'NOME']) || 'N/A';
+    const cpf = getVal(['CPF']);
+    const telefone = getVal(['TELEFONE']);
+    const telefoneRef = getVal(['TELEFONE/REFERENCIA', 'REFERENCIA']);
+    const dataInicioRaw = getVal(['DATA INICIAL', 'INICIO']);
+    const dataFimRaw = getVal(['DATA FINAL', 'FIM']);
+    const emprestimo = parseFloat(getVal(['EMPRÉSTIMO', 'EMPRESTIMO'])) || 0;
+    const diaria = parseFloat(getVal(['DIÁRIA', 'DIARIA'])) || 0;
+    const juros = parseFloat(getVal(['JUROS'])) || 0;
+    const totalPagar = parseFloat(getVal(['TOTAL À PAGAR', 'TOTAL A PAGAR'])) || 0;
+    const valorPago = parseFloat(getVal(['VALOR PAGO'])) || 0;
+    const multaR20 = parseInt(getVal(['MULTA R$20', 'MULTA R$'])) || 0;
+    const multaDobra = parseInt(getVal(['MULTA DOBRA'])) || 0;
+    const multasExtras = parseFloat(getVal(['MULTAS EXTRAS'])) || 0;
+    const diariasPagas = parseInt(getVal(['DIÁRIAS', 'DIARIAS'])) || 0;
+    const observacao = getVal(['OBSERVAÇÃO', 'OBSERVACAO', 'OBS']);
+    const statusCliente = getVal(['STATUSCLIENTE', 'STATUS']);
+
+    if (!dataInicioRaw || !nome || nome === 'N/A') return;
+
+    const dInicio = new Date(dataInicioRaw);
+    dInicio.setHours(0,0,0,0);
+    
+    let dFim = null;
+    if (dataFimRaw) {
+      dFim = new Date(dataFimRaw);
+      dFim.setHours(0,0,0,0);
+    }
+
+    // Calcular dias corridos até a data de referência ou data final (o que for menor)
+    let dataLimite = new Date(dataReferencia);
+    if (dFim && dFim < dataReferencia) {
+      dataLimite = dFim;
+    }
+
+    const diffTime = dataLimite.getTime() - dInicio.getTime();
+    const diasCorridos = Math.floor(diffTime / (1000 * 3600 * 24)) + 1;
+
+    if (diasCorridos < 1) return;
+
+    // Calcular saldo baseado nas diárias pagas
+    const saldo = diariasPagas - diasCorridos;
+    
+    // Calcular saldo financeiro (valor pago - total a pagar)
+    const saldoFinanceiro = valorPago - totalPagar;
+
+    const item = { 
+      nome, 
+      cpf,
+      telefone,
+      telefoneRef,
+      inicio: dInicio.toLocaleDateString('pt-BR'),
+      fim: dFim ? dFim.toLocaleDateString('pt-BR') : '-',
+      dias: diasCorridos, 
+      pagos: diariasPagas, 
+      saldo,
+      emprestimo,
+      diaria,
+      totalPagar,
+      valorPago,
+      saldoFinanceiro,
+      multaR20,
+      multaDobra,
+      multasExtras,
+      observacao: observacao || ''
+    };
+
+    // Lógica de classificação:
+    // - Atrasados: dias corridos > 20 OU saldo de diárias negativo OU valor pago < total a pagar
+    // - Em Dia (OK): saldo de diárias = 0 E valor pago >= total a pagar
+    // - Super Clientes: saldo de diárias > 0 OU valor pago > total a pagar
+    
+    if (diasCorridos > 20 || saldo < 0 || valorPago < totalPagar) {
+      atrasados.push(item);
+    } else if (saldo === 0 && valorPago >= totalPagar) {
+      ok.push(item);
+    } else if (saldo > 0 || valorPago > totalPagar) {
+      superClientes.push(item);
+    } else {
+      ok.push(item);
+    }
+
+    if (diasCorridos === 23) {
+      clientes23Dias.push(item);
+    }
+  });
+
+  // Ordenar por saldo decrescente
+  const sortFn = (a, b) => b.saldo - a.saldo;
+  atrasados.sort(sortFn);
+  ok.sort(sortFn);
+  superClientes.sort(sortFn);
+  clientes23Dias.sort(sortFn);
+
+  globalAtrasados = atrasados;
+  exibirResultados(atrasados, ok, superClientes, clientes23Dias);
+}
+
+function exibirResultados(atrasados, ok, superClientes, clientes23Dias) {
+  document.getElementById('mensagemVazia').style.display = 'none';
+  document.getElementById('resultadoArea').style.display = 'block';
+
+  document.getElementById('countAtrasados').innerText = atrasados.length;
+  document.getElementById('countOK').innerText = ok.length;
+  document.getElementById('countSuper').innerText = superClientes.length;
+
+  const area23 = document.getElementById('area23Dias');
+  if (clientes23Dias.length > 0) {
+    area23.style.display = 'block';
+    document.getElementById('tabela23Dias').innerHTML = buildTable(clientes23Dias);
+  } else {
+    area23.style.display = 'none';
+  }
+
+  document.getElementById('tabelaAtrasados').innerHTML = atrasados.length > 0 ? buildTable(atrasados) : '<p style="color:var(--muted)">Nenhum cliente em atraso.</p>';
+  document.getElementById('tabelaOK').innerHTML = ok.length > 0 ? buildTable(ok) : '<p style="color:var(--muted)">Nenhum cliente rigorosamente em dia.</p>';
+  document.getElementById('tabelaSuper').innerHTML = superClientes.length > 0 ? buildTable(superClientes) : '<p style="color:var(--muted)">Nenhum super cliente identificado.</p>';
+
+  renderChart(atrasados.length, ok.length, superClientes.length);
+}
+
+function buildTable(lista) {
+  let html = `<table><thead><tr>
+    <th>Cliente</th>
+    <th>Período</th>
+    <th>Dias</th>
+    <th>Saldo</th>
+    <th>Financeiro</th>
+    <th>Obs</th>
+    <th>Zap</th>
+  </tr></thead><tbody>`;
+  
+  lista.forEach(i => {
+    let saldoCor = i.saldo < 0 ? 'var(--danger)' : (i.saldo > 0 ? 'var(--success)' : 'var(--primary)');
+    let saldoTexto = i.saldo > 0 ? `+${i.saldo}` : i.saldo;
+    
+    let saldoFinCor = i.saldoFinanceiro < 0 ? 'var(--danger)' : (i.saldoFinanceiro > 0 ? 'var(--success)' : 'var(--primary)');
+    let saldoFinTexto = i.saldoFinanceiro > 0 ? `+R$${i.saldoFinanceiro.toFixed(2)}` : `R$${i.saldoFinanceiro.toFixed(2)}`;
+    
+    // Truncar observação se for muito longa
+    let obs = i.observacao || '-';
+    if (obs.length > 25) {
+      obs = obs.substring(0, 22) + '...';
+    }
+    
+    html += `<tr>
+      <td style="overflow:hidden; text-overflow:ellipsis;">
+        <div style="font-weight:600; margin-bottom:2px; font-size:0.85rem;">${i.nome}</div>
+        <div style="font-size:0.7rem; color:var(--muted); line-height:1.2;">
+          Emp: R$${i.emprestimo.toFixed(2)}<br>
+          Pago: R$${i.valorPago.toFixed(2)}
+        </div>
+      </td>
+      <td style="font-size:0.8rem; overflow:hidden; text-overflow:ellipsis;">
+        <div>${i.inicio}</div>
+        <div style="font-size:0.7rem; color:var(--muted);">${i.fim}</div>
+      </td>
+      <td style="text-align:center; font-size:0.85rem;">
+        <div style="font-weight:600;">${i.dias}</div>
+        <div style="font-size:0.65rem; color:var(--muted);">${i.pagos} pagas</div>
+      </td>
+      <td style="text-align:center;">
+        <span style="color:${saldoCor}; font-weight:700; font-size:0.9rem;">${saldoTexto}</span>
+      </td>
+      <td style="text-align:center; font-size:0.8rem; overflow:hidden; text-overflow:ellipsis;">
+        <span style="color:${saldoFinCor}; font-weight:600;">${saldoFinTexto}</span>
+        <div style="font-size:0.65rem; color:var(--muted);">R$${i.totalPagar.toFixed(2)}</div>
+      </td>
+      <td style="font-size:0.75rem; overflow:hidden; text-overflow:ellipsis;" title="${i.observacao}">
+        ${obs}
+      </td>
+      <td style="text-align:center; padding:2px;">
+        <button class="btn-zap" onclick="enviarWhatsapp('${i.nome}', '${i.telefone}', ${i.saldo}, ${i.saldoFinanceiro.toFixed(2)}, this)">
+          <i class="fa-brands fa-whatsapp"></i>
+        </button>
+      </td>
+    </tr>`;
+  });
+  html += `</tbody></table>`;
+  return html;
+}
+
+function renderChart(atrasados, ok, superClientes) {
+  const ctx = document.getElementById('fluxoChart').getContext('2d');
+  if (chartInstance) chartInstance.destroy();
+  
+  chartInstance = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Atrasados', 'Em Dia (OK)', 'Super Clientes'],
+      datasets: [{
+        data: [atrasados, ok, superClientes],
+        backgroundColor: ['#ef4444', '#3b82f6', '#22c55e'],
+        borderWidth: 0
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'bottom', labels: { color: '#a0a0a0' } }
+      }
+    }
+  });
+}
+
+let globalAtrasados = [];
+
+function copiarAtrasados() {
+  if (globalAtrasados.length === 0) {
+    alert("Não há clientes atrasados para copiar.");
+    return;
+  }
+  
+  let texto = "LISTA DE CLIENTES EM ATRASO:\n\n";
+  globalAtrasados.forEach(c => {
+    texto += `• ${c.nome}: Saldo ${c.saldo} diárias | Saldo R$${c.saldoFinanceiro.toFixed(2)}\n`;
+  });
+  
+  navigator.clipboard.writeText(texto).then(() => {
+    alert("Lista de atrasados copiada para a área de transferência!");
+  }).catch(err => {
+    console.error('Erro ao copiar: ', err);
+  });
+}
+
+function exportarAtrasadosPDF() {
+  if (globalAtrasados.length === 0) {
+    alert("Não há clientes atrasados para exportar.");
+    return;
+  }
+
+  const dataRef = document.getElementById('dataPesquisa').value;
+  const dataFormatada = new Date(dataRef).toLocaleDateString('pt-BR');
+
+  // Criar uma janela temporária para impressão
+  const win = window.open('', '_blank');
+  
+  let html = `
+    <html>
+    <head>
+      <title>Relatório de Atrasados - ${dataFormatada}</title>
+      <style>
+        body { font-family: Arial, sans-serif; padding: 20px; color: #333; }
+        h1 { text-align: center; color: #ef4444; margin-bottom: 5px; }
+        p.sub { text-align: center; margin-bottom: 20px; color: #666; }
+        table { width: 100%; border-collapse: collapse; font-size: 11px; }
+        th, td { border: 1px solid #ddd; padding: 6px; text-align: left; }
+        th { background: #f3f4f6; }
+        .center { text-align: center; }
+        .right { text-align: right; }
+        .bold-red { color: #ef4444; font-weight: bold; }
+        @media print {
+          @page { margin: 1cm; size: landscape; }
+          button { display: none; }
+        }
+      </style>
+    </head>
+    <body>
+      <h1>Relatório de Atrasados</h1>
+      <p class="sub">Data de Referência: ${dataFormatada}</p>
+      <table>
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th class="center">Início</th>
+            <th class="center">Dias</th>
+            <th class="center">Diárias Pagas</th>
+            <th class="center">Saldo Diárias</th>
+            <th class="right">Empréstimo</th>
+            <th class="right">Total à Pagar</th>
+            <th class="right">Valor Pago</th>
+            <th class="right">Saldo R$</th>
+          </tr>
+        </thead>
+        <tbody>
+  `;
+
+  globalAtrasados.forEach(i => {
+    html += `
+      <tr>
+        <td>${i.nome}</td>
+        <td class="center">${i.inicio}</td>
+        <td class="center">${i.dias}</td>
+        <td class="center">${i.pagos}</td>
+        <td class="center bold-red">${i.saldo}</td>
+        <td class="right">R$${i.emprestimo.toFixed(2)}</td>
+        <td class="right">R$${i.totalPagar.toFixed(2)}</td>
+        <td class="right">R$${i.valorPago.toFixed(2)}</td>
+        <td class="right bold-red">R$${i.saldoFinanceiro.toFixed(2)}</td>
+      </tr>
+    `;
+  });
+
+  html += `
+        </tbody>
+      </table>
+      <p style="margin-top:20px; font-size:10px; color:#999; text-align:right;">Gerado em: ${new Date().toLocaleString('pt-BR')}</p>
+      <script>
+        window.onload = function() { 
+          window.print(); 
+          setTimeout(function() { window.close(); }, 500);
+        };
+      <\/script>
+    </body>
+    </html>
+  `;
+
+  win.document.write(html);
+  win.document.close();
+}
+
+let currentZapParams = null;
+
+function enviarWhatsapp(nome, telefone, saldo, saldoFinanceiro, btnElement) {
+  if (!telefone || telefone === 'null' || telefone === 'undefined') {
+    alert("Telefone não identificado na planilha.");
+    return;
+  }
+  let num = telefone.toString().replace(/\D/g, '');
+  if (num.length > 9 && !num.startsWith('55')) num = '55' + num;
+  
+  if (saldo >= 0 && saldoFinanceiro >= 0) {
+    const msg = `Olá ${nome}, parabéns! Seu pagamento está em dia.`;
+    window.open(`https://wa.me/${num}?text=${encodeURIComponent(msg)}`, 'janelaWhatsapp');
+    marcarComoEnviado(btnElement);
+  } else {
+    const valorDevido = Math.abs(saldoFinanceiro);
+    currentZapParams = { nome, num, dias: Math.abs(saldo), valorDevido, btn: btnElement };
+    abrirModalZap();
+  }
+}
+
+function abrirModalZap() {
+  const modal = document.getElementById('modalZap');
+  const list = document.getElementById('msgList');
+  const { nome, dias, valorDevido } = currentZapParams;
+  
+  const opcoes = [
+    { titulo: "1. Cobrança Formal", texto: `Bom dia! 
+Oferta especial pra ficar livre das dívidas!
+Estou entrando em contato para cobrar o valor do empréstimo que ficou pendente.
+Já passou o prazo combinado, então preciso que o pagamento seja feito ainda esta semana.
+Peço que me confirme a data para regularização. Obrigada(o).` },
+    { titulo: "2. Lembrete de Devolução", texto: `Olá!
+Oferta especial pra ficar livre das dívidas!
+Venho lembrar que o valor do empréstimo ainda não foi devolvido.
+Preciso que você me informe a data de pagamento ou realize a devolução o quanto antes.
+Aguardo retorno.` },
+    { titulo: "3. Cobrança Insistente", texto: `Guerreiro eu venho tentando acordo com você, porém você insiste em não responder minhas mensagens. Lembrando foi você que veio até mim então procure responder pra podermos resolver da melhor forma.` },
+    { titulo: "4. Cobrança Amigável", texto: `Olá ${nome}, tudo bem? Notamos uma pendência no seu empréstimo. Podemos agendar o pagamento?` },
+    { titulo: "5. Lembrete Simples", texto: `Oi ${nome}, passando para lembrar do empréstimo em aberto. Aguardo retorno.` },
+    { titulo: "6. Cobrança Detalhada", texto: `Olá ${nome}, Bom dia! 
+*Oferta especial pra ficar livre das dívidas!*
+Estou entrando em contato para cobrar o valor do empréstimo que ficou pendente.
+Já passou o prazo combinado, então preciso que o pagamento seja feito ainda esta semana.
+Peço que me confirme a data para regularização. Obrigada(o).` }
+  ];
+
+  list.innerHTML = '';
+  opcoes.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'msg-option';
+    btn.innerHTML = `<strong>${opt.titulo}</strong><small>${opt.texto}</small>`;
+    btn.onclick = () => {
+      window.open(`https://wa.me/${currentZapParams.num}?text=${encodeURIComponent(opt.texto)}`, 'janelaWhatsapp');
+      marcarComoEnviado(currentZapParams.btn);
+      fecharModalZap();
+    };
+    list.appendChild(btn);
+  });
+
+  modal.style.display = 'flex';
+}
+
+function fecharModalZap() {
+  document.getElementById('modalZap').style.display = 'none';
+}
+
+function marcarComoEnviado(btn) {
+  if (btn) {
+    btn.style.backgroundColor = '#6b7280'; // Cor cinza
+    btn.innerHTML = '<i class="fa-solid fa-check"></i>'; // Ícone de check
+    btn.disabled = true; // Desabilita o clique
+    btn.style.cursor = 'not-allowed';
+    btn.title = "Mensagem já enviada";
+  }
+}
+</script>
+</body>
+</html>
